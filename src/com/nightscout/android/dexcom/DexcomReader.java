@@ -70,11 +70,11 @@ public class DexcomReader extends AsyncTask<UsbSerialDriver, Object, Object>{
 
     //Not being used, but this is a nice to have if we want to kill the receiver, etc from
     //UI
-    public void shutDownReceiver(Context context){
+    /*public void shutDownReceiver(Context context){
 
         UsbManager manager = (UsbManager) context
                 .getSystemService(Context.USB_SERVICE);
-        UsbSerialDriver mSerialDevice = UsbSerialProber.acquire(manager);
+        UsbSerialDriver mSerialDevice = UsbSerialProber.acquire(manager, mPermissionIntent);
         if (mSerialDevice != null) {
             try {
                 mSerialDevice.open();
@@ -97,7 +97,7 @@ public class DexcomReader extends AsyncTask<UsbSerialDriver, Object, Object>{
 
         }
 
-    }
+    }*/
 
     private byte[] getEGVDataPageRange(){
         int[] rets = new int[24];

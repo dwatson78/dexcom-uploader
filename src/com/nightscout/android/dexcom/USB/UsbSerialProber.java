@@ -20,6 +20,11 @@
 
 package com.nightscout.android.dexcom.USB;
 
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
@@ -60,15 +65,18 @@ public enum UsbSerialProber {
 
     CDC_ACM_SERIAL {
         @Override
-        public UsbSerialDriver getDevice(UsbManager manager, UsbDevice usbDevice) {
+        public UsbSerialDriver getDevice(UsbManager manager, UsbDevice usbDevice, PendingIntent mPendingIntent) {
 //            if (!testIfSupported(usbDevice, CdcAcmSerialDriver.getSupportedDevices())) {
 //               return null;
 //            }
-            final UsbDeviceConnection connection = manager.openDevice(usbDevice);
-            if (connection == null) {
-                return null;
-            }
-            return new CdcAcmSerialDriver(usbDevice, connection);
+    		final UsbDeviceConnection connection = manager.openDevice(usbDevice);
+    		if (connection == null){
+    			if(!manager.hasPermission(usbDevice)){
+    				manager.requestPermission(usbDevice, mPendingIntent);
+    			}
+    			return null;
+    		}
+    		return new CdcAcmSerialDriver(usbDevice, connection);
         }
     }; //,
     
@@ -96,9 +104,9 @@ public enum UsbSerialProber {
      * @return the first available {@link UsbSerialDriver}, or {@code null} if
      *         no devices could be acquired
      */
-    public abstract UsbSerialDriver getDevice(final UsbManager manager, final UsbDevice usbDevice);
+    public abstract UsbSerialDriver getDevice(final UsbManager manager, final UsbDevice usbDevice, final PendingIntent mPendingIntent);
 
-    /**
+	/**
      * Acquires and returns the first available serial device among all
      * available {@link android.hardware.usb.UsbDevice}s, or returns {@code null} if no device could
      * be acquired.
@@ -107,9 +115,9 @@ public enum UsbSerialProber {
      * @return the first available {@link UsbSerialDriver}, or {@code null} if
      *         no devices could be acquired
      */
-    public static UsbSerialDriver acquire(final UsbManager usbManager) {
+    public static UsbSerialDriver acquire(final UsbManager usbManager, final PendingIntent mPendingIntent) {
         for (final UsbDevice usbDevice : usbManager.getDeviceList().values()) {
-            final UsbSerialDriver probedDevice = acquire(usbManager, usbDevice);
+            final UsbSerialDriver probedDevice = acquire(usbManager, usbDevice, mPendingIntent);
             if (probedDevice != null) {
                 return probedDevice;
             }
@@ -127,9 +135,9 @@ public enum UsbSerialProber {
      * @return a new {@link UsbSerialDriver}, or {@code null} if no devices
      *         could be acquired
      */
-    public static UsbSerialDriver acquire(final UsbManager usbManager, final UsbDevice usbDevice) {
+    public static UsbSerialDriver acquire(final UsbManager usbManager, final UsbDevice usbDevice, final PendingIntent mPendingIntent) {
         for (final UsbSerialProber prober : values()) {
-            final UsbSerialDriver probedDevice = prober.getDevice(usbManager, usbDevice);
+            final UsbSerialDriver probedDevice = prober.getDevice(usbManager, usbDevice, mPendingIntent);
             if (probedDevice != null) {
                 return probedDevice;
             }
@@ -160,5 +168,4 @@ public enum UsbSerialProber {
         }
         return false;
     }
-
 }

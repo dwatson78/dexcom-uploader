@@ -1,8 +1,12 @@
 package com.nightscout.android.dexcom;
 
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -15,6 +19,7 @@ import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.nightscout.android.dexcom.USB.SerialInputOutputManager;
 import com.nightscout.android.dexcom.USB.USBPower;
 import com.nightscout.android.dexcom.USB.UsbSerialDriver;
@@ -53,6 +58,8 @@ public class DexcomG4Service extends Service {
 	private SerialInputOutputManager mSerialIoManager;
 	private WifiManager wifiManager;
 
+	private PendingIntent mPermissionIntent;
+
 	@Override
 	public IBinder onBind(Intent arg0) {
 		// TODO Auto-generated method stub
@@ -64,6 +71,9 @@ public class DexcomG4Service extends Service {
 		super.onCreate();
 		wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 		mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+		mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+		registerReceiver(mUsbReceiver, filter);
 		// connectToG4();
 		mHandler.removeCallbacks(readAndUpload);
 		mHandler.post(readAndUpload);
@@ -87,7 +97,6 @@ public class DexcomG4Service extends Service {
 			}
 			mSerialDevice = null;
 		}
-		
 	}
 
 	//get the data upload it
@@ -97,20 +106,21 @@ public class DexcomG4Service extends Service {
 
 			try {
 				uploader = new UploadHelper(getBaseContext());
-				if (isConnected() && isOnline()) {
+				if (isConnected()){
+					if(isOnline()) {
 
-					USBOn();
-					doReadAndUpload();
-					USBOff();
-
-					//displayMessage("Upload Complete");
-
+					    USBOn();
+					    doReadAndUpload();
+					    USBOff();
+					    //displayMessage("Upload Complete");
+					} else {
+						displayMessage("Upload Fail, Not Online");
+					}
 				} else {
 					USBOn();
 					USBOff();
-					displayMessage("Upload Fail");
+					displayMessage("Upload Fail, No CGM");
 				}
-
 			} catch (Exception e) {
 				// ignore... for now - simply prevent service and activity from
 				// losing its shit.
@@ -118,7 +128,7 @@ public class DexcomG4Service extends Service {
 				USBOff();
 				e.printStackTrace();
 			}
-			mHandler.postDelayed(readAndUpload, 45000);
+			mHandler.postDelayed(readAndUpload, 90000);
 		}
 	};
 
@@ -127,7 +137,7 @@ public class DexcomG4Service extends Service {
 		try {
 
 			mSerialDevice = null;
-			mSerialDevice = UsbSerialProber.acquire(mUsbManager);
+			mSerialDevice = UsbSerialProber.acquire(mUsbManager, mPermissionIntent);
 
 			if (mSerialDevice != null) {
 				startIoManager();
@@ -159,7 +169,7 @@ public class DexcomG4Service extends Service {
                 }
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 								
-				Handler handler = new Handler();
+				/*Handler handler = new Handler();
 				handler.postDelayed(new Runnable() {
 					@Override
 					//Interesting case: location with lousy wifi
@@ -172,12 +182,14 @@ public class DexcomG4Service extends Service {
 							
 							if (wifiManager.isWifiEnabled()) {
 								wifiManager.setWifiEnabled(false);
+								Log.i(TAG, "WIFI OFF");
 								try {
 									Thread.sleep(2500);
 								} catch (InterruptedException e) {
 									e.printStackTrace();
 								}
 								wifiManager.setWifiEnabled(true);
+								Log.i(TAG, "WIFI ON");
 								try {
 									Thread.sleep(2500);
 								} catch (InterruptedException e) {
@@ -187,7 +199,7 @@ public class DexcomG4Service extends Service {
 						}
 
 					}
-				}, 22500);
+				}, 22500);*/
 
 			}
 
@@ -240,13 +252,12 @@ public class DexcomG4Service extends Service {
 	}
 
 	private boolean isConnected() {
-
-		mSerialDevice = UsbSerialProber.acquire(mUsbManager);
+    	mSerialDevice = UsbSerialProber.acquire(mUsbManager, mPermissionIntent);
 		if (mSerialDevice == null) {
 			//displayMessage("CGM Not Found...");
-			this.stopSelf();
+			//this.stopSelf();
 			return false; // yeah, I know
-		} 
+		}
 		return true;
 
 	}
@@ -287,5 +298,26 @@ public class DexcomG4Service extends Service {
 			// mExecutor.submit(mSerialIoManager);
 		}
 	}
+	private static final String ACTION_USB_PERMISSION =
+    	    "com.nightscout.android.dexcom.USB_PERMISSION";
+    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
+    	 
+    	    public void onReceive(Context context, Intent intent) {
+    	        String action = intent.getAction();
+    	        if (ACTION_USB_PERMISSION.equals(action)) {
+    	            synchronized (this) {
+    	                UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
 
+    	                if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+    	                    if(accessory != null){
+    	                        //call method to set up accessory communication
+    	                    }
+    	                }
+    	                else {
+    	                    //Log.d(TAG, "permission denied for accessory " + accessory);
+    	                }
+    	            }
+    	        }
+    	    }
+    	};
 }

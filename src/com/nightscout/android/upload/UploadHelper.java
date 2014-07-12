@@ -17,8 +17,8 @@ public class UploadHelper extends AsyncTask<EGVRecord, Integer, Long> {
         this.context = context;
     }
 
-    private String DB_URI = "";
-    private String DB_COLLECTION = "";
+    private String DB_URI = "mongodb://10.0.5.56:27017/cgm";
+    private String DB_COLLECTION = "cgmtest1";
 
     protected Long doInBackground(EGVRecord... data) {
         try {
@@ -42,6 +42,7 @@ public class UploadHelper extends AsyncTask<EGVRecord, Integer, Long> {
                 testData.put("date", date.getTime());
                 testData.put("dateString", data[i].displayTime);
                 testData.put("sgv", data[i].bGValue);
+                testData.put("trend", data[i].trend);
                 dexcomData.update(testData, testData, true, false, WriteConcern.UNACKNOWLEDGED);
             }
 

@@ -3,9 +3,13 @@ package com.nightscout.android.dexcom;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
+import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +19,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
 import com.nightscout.android.R;
 
 import java.io.File;
@@ -68,6 +73,7 @@ public class DexcomG4Activity extends Activity {
 			mHandler.postDelayed(updateDataView, 30000);
 		}
 	};
+	
 
 	//Look for and launch the service, display status to user
 	@Override
@@ -111,7 +117,7 @@ public class DexcomG4Activity extends Activity {
 				}
 			}
 		});
-
+		
 	}
 
 	@Override
@@ -158,4 +164,7 @@ public class DexcomG4Activity extends Activity {
 		}
 		return new EGVRecord();
 	}
+	
+	
+
 }
