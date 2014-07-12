@@ -20,10 +20,10 @@
 
 package com.nightscout.android.dexcom.USB;
 
-import android.util.Log;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import android.util.Log;
 
 
 /**

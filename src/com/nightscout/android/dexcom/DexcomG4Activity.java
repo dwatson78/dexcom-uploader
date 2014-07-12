@@ -1,18 +1,20 @@
 package com.nightscout.android.dexcom;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
-import android.hardware.usb.UsbAccessory;
-import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -21,28 +23,21 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.nightscout.android.R;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import com.nightscout.android.settings.*;
 
 /* Main activity for the DexcomG4Activity program */
 public class DexcomG4Activity extends Activity {
 
 
-	/**
-	 * The system's USB service.
-	 */
-	public UsbManager mUsbManager;
-	private Handler mHandler = new Handler();
+    private Handler mHandler = new Handler();
 
-	private int maxRetries = 999;
-	private int retryCount = 0;
+    private int maxRetries = 20;
+    private int retryCount = 0;
 
-	private TextView mTitleTextView;
-	private TextView mDumpTextView;
-	private ScrollView mScrollView;
-	private Button b1;
+    private TextView mTitleTextView;
+    private TextView mDumpTextView;
+    private ScrollView mScrollView;
+    private Button b1;
 
 	
 	//All I'm really doing here is creating a simple activity to launch and maintain the service
@@ -73,7 +68,6 @@ public class DexcomG4Activity extends Activity {
 			mHandler.postDelayed(updateDataView, 30000);
 		}
 	};
-	
 
 	//Look for and launch the service, display status to user
 	@Override
@@ -117,7 +111,7 @@ public class DexcomG4Activity extends Activity {
 				}
 			}
 		});
-		
+
 	}
 
 	@Override
@@ -164,7 +158,22 @@ public class DexcomG4Activity extends Activity {
 		}
 		return new EGVRecord();
 	}
-	
-	
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

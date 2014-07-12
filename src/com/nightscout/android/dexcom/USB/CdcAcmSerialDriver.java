@@ -1,9 +1,9 @@
 package com.nightscout.android.dexcom.USB;
 
+import java.io.IOException;
+
 import android.hardware.usb.*;
 import android.util.Log;
-
-import java.io.IOException;
 
 //import com.hoho.android.usbserial.driver.UsbId;
 

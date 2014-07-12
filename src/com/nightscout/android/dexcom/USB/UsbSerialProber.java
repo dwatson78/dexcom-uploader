@@ -20,16 +20,12 @@
 
 package com.nightscout.android.dexcom.USB;
 
+import java.util.Map;
+
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
-
-import java.util.Map;
 
 //import com.hoho.android.usbserial.driver.Cp2102SerialDriver;
 //import com.hoho.android.usbserial.driver.FtdiSerialDriver;

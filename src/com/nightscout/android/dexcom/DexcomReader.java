@@ -1,17 +1,15 @@
 package com.nightscout.android.dexcom;
 
-import android.content.Context;
-import android.hardware.usb.UsbManager;
-import android.os.AsyncTask;
-import com.nightscout.android.dexcom.USB.UsbSerialDriver;
-import com.nightscout.android.dexcom.USB.UsbSerialProber;
-
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import android.content.Context;
+import android.os.AsyncTask;
+
+import com.nightscout.android.dexcom.USB.UsbSerialDriver;
 
 //Still kludgy
 //Newer, similar to Dex's architecture, classes are in progress, but this works reliably, if not the 
@@ -24,11 +22,7 @@ public class DexcomReader extends AsyncTask<UsbSerialDriver, Object, Object>{
     public String displayTime;
     public String trend;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // ADDED CODE
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
     public EGVRecord[] mRD;
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public DexcomReader (UsbSerialDriver device)
     {
@@ -56,12 +50,8 @@ public class DexcomReader extends AsyncTask<UsbSerialDriver, Object, Object>{
         //Parse 'dem pages
         EGVRecord[] mostRecentData = parseDatabasePages(databasePages);
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //ADDED CODE
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////
         // make first read public
         mRD = mostRecentData;
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         //save them to the android file system for later access
         writeLocalCSV(mostRecentData, context);

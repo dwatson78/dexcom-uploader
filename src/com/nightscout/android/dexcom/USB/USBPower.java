@@ -1,10 +1,11 @@
 package com.nightscout.android.dexcom.USB;
 
-import android.util.Log;
-import com.nightscout.android.dexcom.DexcomG4Activity;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
+
+import android.util.Log;
+
+import com.nightscout.android.dexcom.DexcomG4Activity;
 
 public class USBPower {
 	
